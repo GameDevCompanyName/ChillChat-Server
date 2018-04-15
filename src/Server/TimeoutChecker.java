@@ -6,7 +6,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class TimeoutChecker {
-    Map<String, Integer> clients;
+    volatile Map<String, Integer> clients;
     Broadcaster broadcaster;
 
     public TimeoutChecker(Broadcaster broadcaster){
@@ -19,7 +19,7 @@ public class TimeoutChecker {
     }
 
 
-    public void count(){
+    synchronized public void count(){
         for (Map.Entry<String, Integer> clientEntry: clients.entrySet()){
             String name = clientEntry.getKey();
             Integer timer = clientEntry.getValue();

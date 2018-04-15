@@ -35,7 +35,7 @@ public class CommandLine extends Thread{
             }
             //Иначе отправляем как сообщение в чат
             else {
-                broadcaster.broadcastMessage(ServerMessage.serverMessageSend(text));
+                broadcaster.broadcastMessage("0", ServerMessage.serverMessageSend(text));
                 java.util.Date date = new java.util.Date();
                 System.out.println("["+date+"]SERVER: "+text);
             }

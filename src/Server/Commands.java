@@ -4,7 +4,6 @@ import java.util.Collection;
 
 /*
 Класс команд, отвечает за выполнение команд сервера.
-TODO: выполнять команды пользователей
  */
 
 public class Commands {
@@ -49,6 +48,9 @@ public class Commands {
            case "help":
                help(name);
                break;
+           case "room":
+               room(comms, name);
+               break;
            default:
                if(!name.equals("ServerAdminRootSuperKeyForSecurity")) {
                    Connection conn = broadcaster.getConnectionByLogin(name);
@@ -59,6 +61,8 @@ public class Commands {
                break;
        }
    }
+
+
     private static void updateUserColor(String[] comms, String name){
         Connection caster;
         if(!name.equals("ServerAdminRootSuperKeyForSecurity")) {
@@ -170,20 +174,25 @@ public class Commands {
         else{
             caster=null;
         }
-        Collection<Connection> connections = broadcaster.getConnections();
-        if(connections.isEmpty())
+        Collection<String> users = broadcaster.getUsersByRoomId(broadcaster.getRoomIdByUser(name));
+
+        if(users.isEmpty())
         {
             System.out.println(Utilities.getStartText("Commands")+"Никого нет");
-            broadcaster.broadcastMessage(ServerMessage.serverMessageSend("Никого нет"));
+            broadcaster.broadcastMessage(broadcaster.getRoomIdByUser(name),
+                    ServerMessage.serverMessageSend("Никого нет в комнате "+broadcaster.getRoomNameByUser(name)));
             return;
         }
-        System.out.println(Utilities.getStartText("Commands")+"В сети");
-        broadcaster.broadcastMessage(ServerMessage.serverMessageSend("В сети:"));
-        for (Connection connect: connections
-                ) {
-            System.out.println(Utilities.getStartText("Commands")+connect.getUserName());
-            broadcaster.broadcastMessage(ServerMessage.serverMessageSend(connect.getUserName()));
+        System.out.println(Utilities.getStartText("Commands")+"В сети:");
+        broadcaster.broadcastMessage(broadcaster.getRoomIdByUser(name),
+                ServerMessage.serverMessageSend("В комнате "+broadcaster.getRoomNameByUser(name)+":"));
+        StringBuilder string= new StringBuilder();
+        for (String user: users) {
+            System.out.println(Utilities.getStartText("Commands")+user);
+            string.append(user).append("\n");
         }
+        broadcaster.broadcastMessage(broadcaster.getRoomIdByUser(name), ServerMessage.serverMessageSend(string.toString().trim()));
+
     }
     private static void discall(String name){
         Connection caster;
@@ -229,7 +238,7 @@ public class Commands {
                 if(conn!=null) {
                     String kickMsg = comms[1]+" кикнут по причине: "+comms[2];
                     System.out.println(Utilities.getStartText("Commands")+kickMsg);
-                    broadcaster.broadcastMessage(ServerMessage.serverUserKickedSend(comms[1], comms[2]));
+                    broadcaster.broadcastMessage(broadcaster.getRoomIdByUser(name), ServerMessage.serverUserKickedSend(comms[1], comms[2]));
                     conn.disconnect("кикнут");
                     return;
                 }
@@ -263,6 +272,23 @@ public class Commands {
         String color = connection.getUserColor();
         connection.sendMessage(ServerMessage.serverMessageSend("Ваш цвет - "+color));
     }
+
+    private static void room(String[] comms, String name) {
+        Connection connection = broadcaster.getConnectionByLogin(name);
+        if(comms.length == 2) {
+            broadcaster.removeClientFromRoom(name);
+            broadcaster.addClientToRoom(name, comms[1]);
+        }
+
+        else if(comms.length==1){
+            connection.sendMessage(ServerMessage.serverMessageSend("Ты в комнате "+broadcaster.getRoomNameByUser(name)));
+        }
+        else{
+        connection.sendMessage(ServerMessage.serverMessageSend("Format: /room <roomId>"));
+        }
+
+    }
+
     private static void help(String name){
         if(name.equals("ServerAdminRootSuperKeyForSecurity")) {
             System.out.println(Utilities.getStartText("Commands") + "(help)Вы сервер!");

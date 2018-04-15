@@ -16,6 +16,7 @@ public class Connection extends Thread {
     private Broadcaster broadcaster;
     private DBConnector dbConnector;
     private String startText = Utilities.getStartText("Connection");
+    private Boolean stopped=false;
 
     private String userName;  //Имя пользователя
     private String userColor;  //Цвет пользователя
@@ -85,7 +86,7 @@ public class Connection extends Thread {
             out.println(ServerMessage.userColorSend(userName, userColor));
 
             //В цикле читаем сообщений пользователя
-            while (true){
+            while (!stopped){
 
                 String incomingMessage = in.readLine();
                 ServerMessage.read(incomingMessage, this);
@@ -141,6 +142,7 @@ public class Connection extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        stopped=true;
         this.interrupt();
     }
 }

@@ -34,6 +34,15 @@ public class ServerMessage {
             case "disconnect":
                 ServerMethods.disconnectReceived(connection, "пользователь разорвал соединение");
                 return "disconnect";
+            case "joinRoom":
+                ServerMethods.joinRoomReceived(
+                        connection.getUserName(),
+                        incomingMessage.get("first").toString()
+                );
+                return "true";
+            case "ping":
+                ServerMethods.pingReceived(connection);
+                return "true";
             default:
                 return "false";
         }
@@ -138,11 +147,26 @@ public class ServerMessage {
         object.put("type", "ping");
         return object.toJSONString();
     }
+
+    public static String serverPongSend(){
+        JSONObject object = new JSONObject();
+        object.put("type", "pong");
+        return object.toJSONString();
+    }
+
     public static String userRoleSend(String login, String role){
         JSONObject object = new JSONObject();
         object.put("type", "userColor");
         object.put("first", login);
         object.put("second", role);
+        return object.toJSONString();
+    }
+
+    public static String userChangedRoomSend(String roomId, String roomName){
+        JSONObject object = new JSONObject();
+        object.put("type", "userChangedRoom");
+        object.put("first", roomId);
+        object.put("second", roomName);
         return object.toJSONString();
     }
 

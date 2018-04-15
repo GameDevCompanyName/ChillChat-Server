@@ -56,7 +56,7 @@ public class ServerMethods {
         }
         //Иначе отправляем как сообщение в чат
         else {
-            broadcaster.broadcastMessage(ServerMessage.userMessageSend(login, message, userColor));
+            broadcaster.broadcastMessage(broadcaster.getRoomIdByUser(login), ServerMessage.userMessageSend(login, message, userColor));
             java.util.Date date = new java.util.Date();
             System.out.println("[" + date + "]" + login + ": " + message);
         }
@@ -66,5 +66,14 @@ public class ServerMethods {
         System.out.println(Utilities.getStartText("ServerMethods")+connection.getUserName()+" отключился: "+reason);
         broadcaster.disconnectClient(connection.getUserName());
         connection.disconnect(reason);
+    }
+
+    public static void joinRoomReceived(String userName, String roomId){
+        broadcaster.removeClientFromRoom(userName);
+        broadcaster.addClientToRoom(userName, roomId);
+    }
+
+    public static void pingReceived(Connection connection){
+        connection.sendMessage(ServerMessage.serverPongSend());
     }
 }
